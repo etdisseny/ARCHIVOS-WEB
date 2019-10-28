@@ -1,0 +1,286 @@
+@font-base: 1em Courier, Helvetica, Arial, sans-serif;
+@bg-base: #eee;
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	background-color: @bg-base;
+}
+
+// Selectores anidados
+header {
+	padding: 10px;
+	background-color: #333;
+
+	> h1 {
+		background-color: @bg-base;
+	}
+
+	p {
+		color: #fff;
+		font: @font-base;
+	}
+}
+
+// Uso de comentarios
+/* Este es un comentario trasladado
+al fichero CSS al tener el formato 
+compatible con CSS */
+
+// Referencia al antecesor
+a {
+	color: red;
+	text-decoration: none;
+
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+.boton {
+	&-ok {
+		color: green;
+	}
+
+	&-error {
+		color: red;
+	}
+}
+
+.abuelo {
+	.padre {
+		& > h1 {
+			color: white;
+		}
+	}
+}
+
+.abuelo {
+	.padre {
+		.maternos & {
+			color: red;
+		}
+	}
+}
+
+div, p, span {
+	& + & {
+		color: white;
+	}
+}
+
+// Uso de variables
+@div-name: test-img;
+@fsize: font-size;
+@fweight: font-weight;
+
+@saludo: 'hola';
+@hola: 'Hola LESS.';
+
+#@{div-name} {
+	@bg-base: #fc0;
+
+	height: 200px;
+	color: #ff;
+	@{fsize}: 24px;
+	@{fweight}: bold;
+	background-color: @bg-base;
+}
+
+#@{div-name}-2 {
+	color: #333;
+	background-color: @bg-base;
+
+	&:after {
+		content: @@saludo;
+	}
+}
+
+// Operaciones y funciones predefinidas
+@ancho: 100%;
+@border-base: 1px;
+@border-extra: 3;
+@bg-medio: @bg-base / 2;
+@bg-alternativo: @bg-base - #15a;
+
+.column-2 {
+	float: left;
+	box-sizing: border-box;
+	width: @ancho/2;
+	padding: 10px;
+	border: @border-base solid #333;
+	background-color: @bg-alternativo;
+}
+
+.column-4 {
+	float: left;
+	box-sizing: border-box;
+	width: @ancho/4;
+	padding: 10px;
+	border: @border-base solid #333;
+	background-color: spin(saturate(@bg-alternativo, 40%), 10);
+}
+
+.special-column {
+	border-width: @border-base + @border-extra;
+}
+
+.clearfix {
+	clear: both;
+}
+
+// Extend
+.selectorA > a {
+	color: #aaa;
+}
+
+.selectorA > a:hover {
+	text-decoration: underline;
+}
+
+.selectorB {
+	border: 1px solid #fff;
+}
+
+.selectorC:extend(.selectorA all, .selectorB) {
+	background-color: #fc0;
+}
+
+// Merge
+@rutaBaseImg: '../img/';
+.alert {
+	background+: url('@{rutaBaseImg}bg/alerta_base.png');
+	background-repeat+: no-repeat;
+	background-position+: center;
+}
+
+.alert-ok {
+	background+: url('@{rutaBaseImg}bg/alerta_base.png');
+	background-repeat+: no-repeat;
+	background-position+: center;
+	// Equivalente a usar el mixin ".alert;"
+	
+	background+: url('@{rutaBaseImg}bg/alerta_ok.png');
+	background-repeat+: no-repeat;
+	background-position+: left top;
+}
+
+// Imports
+// (reference) para usar contenidos (para .less)
+// (inline) incluye sin preprocesar (para .css)
+// (less) fuerza interpretarlo como LESS
+// (css) fuerza interpretarlo como CSS (para .css)
+// (once) garantiza que se importa sólo una vez
+// (multiple) opuesto al comportamiento de once
+@import (reference) 'base.less';
+.extendido:extend(.base) {
+	border: 1px solid #ccc;
+}
+
+// Condicionales
+& when ( isnumber(@saludo) = false) {
+	.despedida {
+		color: white;
+	}
+}
+
+// Bucles o loops
+.generate-columns(@n, @i:1) when (@i =< @n) {
+	.column-@{i} {
+		width: (@i*100%/@n);
+	}
+	.generate-columns(@n, (@i + 1));
+}
+.generate-columns(12);
+
+// Mixins
+.aviso() {
+	text-align: center;
+	font-size: 2em;
+	background-color: #aaa;
+
+	&:hover {
+		background-color: #eee;
+	}
+}
+
+.aviso-ok {
+	.aviso();
+	color: green;
+}
+
+.aviso-error {
+	.aviso();
+	color: red;
+}
+
+// Mixins como funciones y parámetros
+.miCalculo(@ancho: 10px, @alto: 5px)
+{
+	border: @arguments;
+	@resultado: @ancho*@alto/15;
+}
+
+article {
+	.miCalculo(@alto: 5px, @ancho: 10px);
+	padding: @resultado;
+}
+
+.formato(claro; @color) {
+	background-color: lighten(@color, 10%);
+}
+
+.formato(oscuro; @color) {
+	background-color: darken(@color, 10%);
+}
+
+.formato(@_; @color) {
+	border-color: @color;
+}
+
+@miFormato: otro;
+p.especial {
+	.formato(@miFormato, #fc0);
+}
+
+// Reglas como parámetros en Mixins
+.viejos-navegadores(@reglas) {
+	html.old & { @reglas(); }
+}
+
+@misReglas: {
+	background-color: red;
+};
+
+header {
+	// Estilos comunes
+	color: #333;
+
+	.viejos-navegadores(@misReglas);
+}
+
+footer {
+	// Estilos comunes
+	color: #fc0;
+
+	.viejos-navegadores({
+		border: 1px solid white;
+		background-color: red;
+	});
+}
+
+// Mixins Condicionales (Guards)
+.aplicarColorFondo(@color) when ( iscolor(@color) = true) {
+	background-color: @color;
+}
+
+.elemento1 {
+	.aplicarColorFondo('hola');
+}
+
+.elemento2 {
+	text-align: left;
+	.aplicarColorFondo(blue);
+}
